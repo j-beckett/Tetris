@@ -50,6 +50,8 @@ public:
 	// called every game loop to handle ticks & tetromino placement (locking)
 	void processGameLoop(float secondsSinceLastLoop);
 
+	
+
 	// A tick() forces the currentShape to move (if there were no tick,
 	// the currentShape would float in position forever). This should
 	// call attemptMove() on the currentShape.  If not successful, lock() 
@@ -58,6 +60,15 @@ public:
 	void tick();
 
 private:
+	//This function calculates the bonus points for removing more than one line
+	//with a tetromino block.
+	//1 line removed = 1 points
+	//2 lines removed = 3 points
+	//3 lines removed = 5 points
+	//4 lines removed =  8 points
+	//the white font is updated in processGameLoop
+	void calculatePoints(int rowsRemovedAtOnce);
+
 	// reset everything for a new game (use existing functions) 
 	//  - set the score to 0 and call updateScoreDisplay()
 	//  - call determineSecondsPerTick() to determine the tick rate.
@@ -65,6 +76,10 @@ private:
 	//  - pick & spawn next shape
 	//  - pick next shape again (for the "on-deck" shape)
 	void reset();
+
+
+	//Updates the location of the "ghost shape" ( the shadow of where the tetromino would land if you hit the spacebar)
+	void updateGhostShape();
 
 	// assign nextShape.setShape a new random shape  
 	void pickNextShape();
@@ -115,7 +130,7 @@ private:
 	//   For details/instructions on these 3 operations see:
 	//       www.sfml-dev.org/tutorials/2.5/graphics-sprite.php
 	//       use member variables: window and blockSprite (assigned in constructor)
-	void drawBlock(const Point& topLeft, int xOffset, int yOffset, TetColor color);
+	void drawBlock(const Point& topLeft, int xOffset, int yOffset, TetColor color, int alpha = 255);
 										
 	// Draw the gameboard blocks on the window
 	//   Iterate through each row & col, use drawBlock() to 
@@ -126,7 +141,7 @@ private:
 	//	 Iterate through each mapped loc & drawBlock() for each.
 	//   The topLeft determines a 'base point' from which to calculate block offsets
 	//      If the Tetromino is on the gameboard: use gameboardOffset
-	void drawTetromino(const GridTetromino& tetromino, const Point& topLeft);
+	void drawTetromino(const GridTetromino& tetromino, const Point& topLeft, int alpha = 255);
 	
 	// update the score display
 	// form a string "score: ##" to display the current score
@@ -160,6 +175,7 @@ private:
     Gameboard board;			// the gameboard (grid) to represent where all the blocks are.
     GridTetromino nextShape;	// the tetromino shape that is "on deck".
     GridTetromino currentShape;	// the tetromino that is currently falling.
+	GridTetromino ghostShape;
 	
 	// Graphics members ------------------------------------------
 	const Point gameboardOffset;	// pixel XY offset of the gameboard on the screen

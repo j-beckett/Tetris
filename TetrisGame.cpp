@@ -44,6 +44,8 @@ void TetrisGame::draw() {
 	drawTetromino(currentShape, gameboardOffset);
 	drawTetromino(nextShape, nextShapeOffset);
 
+	drawTetromino(ghostShape, gameboardOffset, 100);
+	updateGhostShape();
 	window.draw(scoreText);
 
 	//drawGameboard();
@@ -56,15 +58,19 @@ void TetrisGame::onKeyPressed(sf::Event event) {                            //wo
 
 	if (event.key.code == sf::Keyboard::Up) {
 		attemptRotate(currentShape);
+		updateGhostShape();
 	}
 	else if (event.key.code == sf::Keyboard::Left) {
 		attemptMove(currentShape, -1, 0);
+		updateGhostShape();
 	}
 	else if (event.key.code == sf::Keyboard::Right) {
 		attemptMove(currentShape, 1, 0);
+		updateGhostShape();
 	}
 	else if (event.key.code == sf::Keyboard::Down) {
 		if (!attemptMove(currentShape, 0, 1)) {
+			updateGhostShape();
 			lock(currentShape);
 			shapePlacedSinceLastGameLoop = true;
 		};
@@ -93,13 +99,44 @@ void TetrisGame::processGameLoop(float secondsSinceLastLoop) {                  
 			return;
 		}
 
-		score = score + board.removeCompletedRows();
+		calculatePoints(board.removeCompletedRows());
 		updateScoreDisplay();
 		determineSecondsPerTick();                                                     //FIXME: this logic needs to be updated. speed is constant atm
 	}
 
 	shapePlacedSinceLastGameLoop = false;
 }
+
+
+//This function calculates the bonus points for removing more than one line
+//with a tetromino block.
+//1 line removed = 1 points
+//2 lines removed = 3 points
+//3 lines removed = 5 points
+//4 lines removed =  8 points
+//the white font is updated in processGameLoop
+
+void TetrisGame::calculatePoints(int rowsRemovedAtOnce) {           //Yes.. these are magic numbers. We also assum that the max bloock size will always be four
+																	//If you wanted to be fussy, you could do some math on blocklocks.length() or something but this is good enough for now :)
+	if (rowsRemovedAtOnce == 0)
+		return;
+
+	if (rowsRemovedAtOnce == 1) {
+		score = score + 1;
+	}
+	else if (rowsRemovedAtOnce == 2) {
+		score = score + 3;
+	}
+	else if (rowsRemovedAtOnce == 3) {
+		score = score + 5;
+	}
+	else if (rowsRemovedAtOnce == 4) {
+		score = score + 8;
+	}
+
+}
+
+
 
 	// A tick() forces the currentShape to move (if there were no tick,
 	// the currentShape would float in position forever). This should
@@ -111,6 +148,7 @@ void TetrisGame::tick() {
 	std::cout << "TICK TOK \n";
 
 	if (!attemptMove(currentShape, 0, 1)) {
+		updateGhostShape();
 		lock(currentShape);
 		shapePlacedSinceLastGameLoop = true;
 	}
@@ -137,6 +175,16 @@ void TetrisGame::reset() {
 
 	spawnNextShape();
 }
+
+
+
+void TetrisGame::updateGhostShape() {
+	ghostShape = currentShape;
+
+	drop(ghostShape);
+}
+
+
 
 	// assign nextShape.setShape a new random shape  
 void TetrisGame::pickNextShape() {
@@ -230,13 +278,15 @@ void TetrisGame::lock(const GridTetromino& shape) {
 	//   For details/instructions on these 3 operations see:
 	//       www.sfml-dev.org/tutorials/2.5/graphics-sprite.php
 	//       use member variables: window and blockSprite (assigned in constructor)
-void TetrisGame::drawBlock(const Point& topLeft, int xOffset, int yOffset, TetColor color) {
+void TetrisGame::drawBlock(const Point& topLeft, int xOffset, int yOffset, TetColor color, int alpha) {
 
 	int pixelOffset = BLOCK_WIDTH * static_cast<int>(color);
 
 	blockSprite.setTextureRect(sf::IntRect(pixelOffset, 0, BLOCK_WIDTH, BLOCK_HEIGHT)); //block 32 px wide - sets the color of the block 
 
 	blockSprite.setPosition(sf::Vector2f(topLeft.getX() + (xOffset * BLOCK_WIDTH), topLeft.getY()+ (yOffset * BLOCK_HEIGHT)));
+
+	blockSprite.setColor(sf::Color(255, 255, 255, alpha));
 
 	window.draw(blockSprite);
 }
@@ -245,11 +295,6 @@ void TetrisGame::drawBlock(const Point& topLeft, int xOffset, int yOffset, TetCo
 	//   Iterate through each row & col, use drawBlock() to 
 	//   draw a block if it isn't empty.
 void TetrisGame::drawGameboard() {
-	/*board.setContent(0, 1, 2);
-	board.setContent(0, 5, 2);
-	board.setContent(1, 1, 4);
-	board.setContent(4, 1, 4);
-	board.setContent(9, 5, 1);*/
 	for (int y = 0; y < board.MAX_Y; y++) {             //This loops on the rows.
 		for (int x = 0; x < board.MAX_X; x++) {         //This loops on the columns. we want a board tall and skinny
 			if (board.getContent(x,y) != board.EMPTY_BLOCK) {
@@ -264,13 +309,13 @@ void TetrisGame::drawGameboard() {
 	//	 Iterate through each mapped loc & drawBlock() for each.
 	//   The topLeft determines a 'base point' from which to calculate block offsets
 	//      If the Tetromino is on the gameboard: use gameboardOffset
-void TetrisGame::drawTetromino(const GridTetromino& tetromino, const Point& topLeft) {
+void TetrisGame::drawTetromino(const GridTetromino& tetromino, const Point& topLeft, int alpha) {
 	std::vector<Point> currLocs = tetromino.getBlockLocsMappedToGrid();
 
 	for (const auto& loc : currLocs) {          //top left is currently gameboard offset 
 		//Point spawn = board.getSpawnLoc();																	//spawn Loc should be 5,0 for now, but it needs to get fixed
 
-		drawBlock(topLeft, loc.getX(),  loc.getY(), tetromino.getColor());  //move the tetromino points to the middle by offsetting by spawn loc
+		drawBlock(topLeft, loc.getX(),  loc.getY(), tetromino.getColor(), alpha);  //move the tetromino points to the middle by offsetting by spawn loc
 	}													//am I supposed to be calling another function here to do the moving?? Work with grid loc?
 }
 
