@@ -190,7 +190,7 @@ private:
 	// Note: a "tick" is the amount of time it takes a block to fall one line.
 
 	const double MAX_SECONDS_PER_TICK = 0.75;		// start off with a slow (max) tick rate. (seconds per game tick)
-	const double MIN_SECONDS_PER_TICK = 0.20;		// this is the fastest tick pace (seconds per game tick).
+	const double MIN_SECONDS_PER_TICK = 0.10;		// this is the fastest tick pace (seconds per game tick).                 //this orig was .20
 	double secondsPerTick = MAX_SECONDS_PER_TICK;	// the number of seconds per tick (changes depending on score)
 											
 	double secondsSinceLastTick = 0.0;			// update this every game loop until it is >= secsPerTick,

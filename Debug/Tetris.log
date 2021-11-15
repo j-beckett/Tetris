@@ -1,6 +1,4 @@
-﻿  Main.cpp
-C:\Users\17782\source\repos\Tetris\Tetris\Main.cpp(11,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  TetrisGame.cpp
+﻿  TetrisGame.cpp
 C:\Users\17782\source\repos\Tetris\Tetris\TetrisGame.cpp(17,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 C:\Users\17782\source\repos\Tetris\Tetris\TetrisGame.cpp(287,95): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
           with
@@ -12,6 +10,5 @@ C:\Users\17782\source\repos\Tetris\Tetris\TetrisGame.cpp(287,54): warning C4244:
           [
               T=float
           ]
-  Generating Code...
 C:\Users\17782\source\repos\Tetris\Tetris\TetrisGame.cpp(225): warning C4715: 'TetrisGame::attemptRotate': not all control paths return a value
   Tetris.vcxproj -> C:\Users\17782\source\repos\Tetris\Debug\Tetris.exe

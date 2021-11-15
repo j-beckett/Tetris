@@ -145,7 +145,7 @@ void TetrisGame::calculatePoints(int rowsRemovedAtOnce) {           //Yes.. thes
 	// shape was placed (using shapePlacedSinceLastGameLoop)
 void TetrisGame::tick() {
 
-	std::cout << "TICK TOK \n";
+	//std::cout << "TICK TOK \n";
 
 	if (!attemptMove(currentShape, 0, 1)) {
 		updateGhostShape();
@@ -356,9 +356,9 @@ bool TetrisGame::isShapeWithinBorders(const GridTetromino& shape) const {
 
 	std::vector<Point> mappedLocs = shape.getBlockLocsMappedToGrid();
 
-	std::cout << "mapped locs are: \n";
+	//std::cout << "mapped locs are: \n";
 	for (auto& pnt : mappedLocs) {
-		std::cout << pnt.toString();
+		//std::cout << pnt.toString();
 
 		//trying to figure out the prob here
 		//int leftBoundry = (board.MAX_X / 2) * -1;
@@ -379,7 +379,23 @@ bool TetrisGame::isShapeWithinBorders(const GridTetromino& shape) const {
 	//   - basic: use MAX_SECS_PER_TICK
 	//   - advanced: base it on score (higher score results in lower secsPerTick)
 void TetrisGame::determineSecondsPerTick() {
-	secondsPerTick = MAX_SECONDS_PER_TICK;														//FIXME: ADD in more complex logic for this 
+	secondsPerTick = MAX_SECONDS_PER_TICK;
+	
+													//FIXME: ADD in more complex logic for this 
+	
+	if (score > 0) {
+		//double speed{ 0 };
+		int speedFactor = score / 5;     
+		double speed = (speedFactor * .30);     //for every 5 points, increase the speed of tick by .1
+		secondsPerTick = MAX_SECONDS_PER_TICK - speed;
+
+		if (secondsPerTick < MIN_SECONDS_PER_TICK)
+			secondsPerTick = MIN_SECONDS_PER_TICK;
+	}
+
+	
+
+	
 }
 
 
